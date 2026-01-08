@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>圖書館探險家 - 美國 250 時空航行</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap');
+        
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #f8fafc;
+        }
+
+        .card {
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            perspective: 1000px;
+        }
+
+        .card-inactive {
+            filter: grayscale(100%) brightness(70%);
+            cursor: pointer;
+        }
+
+        .card-active {
+            filter: none;
+            transform: scale(1.05);
+            box-shadow: 0 10px 25px rgba(245, 158, 11, 0.4);
+            border: 4px solid #f59e0b;
+        }
+
+        .glow {
+            animation: glow-pulse 2s infinite;
+        }
+
+        @keyframes glow-pulse {
+            0% { box-shadow: 0 0 5px #f59e0b; }
+            50% { box-shadow: 0 0 20px #fbbf24; }
+            100% { box-shadow: 0 0 5px #f59e0b; }
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.9);
+            z-index: 50;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .hint-img {
+            width: 100%;
+            max-height: 250px;
+            object-fit: cover;
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            border: 3px solid #e2e8f0;
+        }
+
+        .story-box {
+            background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
+            color: white;
+        }
+    </style>
+</head>
+<body class="min-h-screen pb-10">
+
+    <!-- Header & Story Introduction -->
+    <header class="story-box text-white py-8 px-6 shadow-xl text-center mb-8 relative overflow-hidden">
+        <div class="relative z-10">
+            <h1 class="text-3xl font-bold mb-2">時空探險家：解鎖250年的秘密</h1>
+            <div class="max-w-2xl mx-auto text-sm md:text-base opacity-90 leading-relaxed bg-black/20 p-4 rounded-lg inline-block">
+                探險家你好！我們收到一封來自2027年的求救信，<br>
+                美國建國250週年的「時空之鑰」碎成了五片，散落在圖書館各處。<br>
+                需要你運用觀察力找出碎片，開啟通往慶典的大門！
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-4xl mx-auto px-4">
+        <!-- Progress Bar -->
+        <div class="mb-8 bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+            <div class="flex justify-between mb-2">
+                <span class="text-sm font-medium text-blue-700">歷史碎片收集進度</span>
+                <span id="progress-text" class="text-sm font-medium text-blue-700">0 / 5</span>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-4">
+                <div id="progress-bar" class="bg-gradient-to-r from-blue-600 to-red-500 h-4 rounded-full transition-all duration-500" style="width: 0%"></div>
+            </div>
+        </div>
+
+        <!-- Cards Grid -->
+        <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-10">
+            <!-- Card 1 -->
+            <div id="card-0" onclick="handleCardClick(0)" class="card card-inactive bg-white rounded-2xl p-4 flex flex-col items-center text-center shadow-md border-2 border-transparent">
+                <div class="text-4xl mb-2">🚢</div>
+                <div class="font-bold">航向新世界</div>
+                <div id="status-0" class="text-xs mt-2 text-gray-500">尋找碎片 1</div>
+            </div>
+            <!-- Card 2 -->
+            <div id="card-1" onclick="handleCardClick(1)" class="card card-inactive bg-white rounded-2xl p-4 flex flex-col items-center text-center shadow-md border-2 border-transparent">
+                <div class="text-4xl mb-2">⚡</div>
+                <div class="font-bold">富蘭克林的風箏</div>
+                <div id="status-1" class="text-xs mt-2 text-gray-500">尋找碎片 2</div>
+            </div>
+            <!-- Card 3 -->
+            <div id="card-2" onclick="handleCardClick(2)" class="card card-inactive bg-white rounded-2xl p-4 flex flex-col items-center text-center shadow-md border-2 border-transparent">
+                <div class="text-4xl mb-2">📜</div>
+                <div class="font-bold">自由的宣言</div>
+                <div id="status-2" class="text-xs mt-2 text-gray-500">尋找碎片 3</div>
+            </div>
+            <!-- Card 4 -->
+            <div id="card-3" onclick="handleCardClick(3)" class="card card-inactive bg-white rounded-2xl p-4 flex flex-col items-center text-center shadow-md border-2 border-transparent">
+                <div class="text-4xl mb-2">🚀</div>
+                <div class="font-bold">創新與科技</div>
+                <div id="status-3" class="text-xs mt-2 text-gray-500">尋找碎片 4</div>
+            </div>
+            <!-- Card 5 -->
+            <div id="card-4" onclick="handleCardClick(4)" class="card card-inactive bg-white rounded-2xl p-4 flex flex-col items-center text-center shadow-md border-2 border-transparent">
+                <div class="text-4xl mb-2">🎆</div>
+                <div class="font-bold">慶祝 250 週年</div>
+                <div id="status-4" class="text-xs mt-2 text-gray-500">尋找碎片 5</div>
+            </div>
+        </div>
+
+        <div class="text-center text-gray-500 text-sm italic">
+            💡 點擊上方的關卡卡片來查看提示並輸入解鎖代碼
+        </div>
+    </main>
+
+    <!-- Modal: Hint/Question/Input -->
+    <div id="modal" class="modal">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl relative overflow-y-auto max-h-[90vh]">
+            <button onclick="closeModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 z-10 bg-white rounded-full p-1 shadow">✕</button>
+            <div id="modal-content">
+                <!-- Dynamic Content -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Final Hidden Level -->
+    <div id="final-modal" class="modal">
+        <div class="bg-gradient-to-br from-red-600 via-white to-blue-700 p-1 rounded-3xl max-w-lg w-full shadow-2xl">
+            <div class="bg-white rounded-[22px] p-8 text-center">
+                <div class="flex justify-center gap-2 mb-4">
+                    <span class="text-5xl">🎊</span>
+                    <span class="text-6xl font-black text-blue-900">250</span>
+                    <span class="text-5xl">🎊</span>
+                </div>
+                <h2 class="text-2xl font-bold mb-4 text-blue-800">時空之鑰已修復！</h2>
+                <div class="text-left bg-blue-50 p-4 rounded-xl mb-6 text-sm md:text-base text-gray-700 leading-relaxed border-l-4 border-blue-500">
+                    <p class="mb-2"><strong>親愛的探險家：</strong></p>
+                    <p>你已成功穿越時空！美國即將在 2026 年迎來建國 250 週年。從 1776 年的《獨立宣言》到今日的科技與多元文化，這是一場關於「自由」的壯大旅程。</p>
+                    <p class="mt-2 font-bold text-red-600">請前往圖書館服務台（特展區），向館員領取「America250 探險紀念獎勵」！</p>
+                </div>
+                <button onclick="closeFinalModal()" class="w-full bg-blue-900 text-white font-bold py-4 rounded-xl shadow-lg hover:bg-blue-800 transition transform active:scale-95">完成任務</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const questData = [
+            {
+                hintTitle: "故事的起點：在1樓找找，今年寒假閱讀節是介紹哪個國家呢？。",
+                hintImage: "https://lh3.googleusercontent.com/u/0/d/14063RDGtNvicj-CV7w5ZGm-HQkSEjNHR", 
+                qrKey: "泰國",
+                question: "寒假閱讀節的主題是？",
+                options: ["「泰」想見你", "「泰」享閱讀", "「泰」會讀書", "「泰」度決定一切"],
+                answer: 1,
+                icon: "🚢"
+            },
+            {
+                hintTitle: "科學與觀察：富蘭克林在雷雨中放風箏，請找到查詢資料的電腦區。",
+                hintImage: "https://placehold.co/600x400/3b82f6/white?text=查詢電腦區照片",
+                qrKey: "USA02",
+                question: "美國建國元勳富蘭克林，除了政治家他還是發明什麼的科學家？",
+                options: ["電燈泡", "避雷針", "電話機", "飛機"],
+                answer: 1,
+                icon: "⚡"
+            },
+            {
+                hintTitle: "自由的宣言：請找到館內的「兒童繪本區」，尋找有關自由的故事。",
+                hintImage: "https://placehold.co/600x400/ef4444/white?text=繪本區照片",
+                qrKey: "USA03",
+                question: "1776 年美國在哪一份重要文件中宣布了所有人生而平等？",
+                options: ["權利法案", "獨立宣言", "憲法草案", "自由之書"],
+                answer: 1,
+                icon: "📜"
+            },
+            {
+                hintTitle: "邁向未來：從阿波羅計畫到現代科技，請找到「新書展示區」。",
+                hintImage: "https://placehold.co/600x400/10b981/white?text=新書展示區照片",
+                qrKey: "USA04",
+                question: "美國是第一個完成哪項人類壯舉，展示了創新的精神？",
+                options: ["發明腳踏車", "人類登陸月球", "發現地心引力", "環遊世界一周"],
+                answer: 1,
+                icon: "🚀"
+            },
+            {
+                hintTitle: "250 週年特展：請找到這張充滿慶祝氣氛的照片（特展海報處）。",
+                hintImage: "https://placehold.co/600x400/8b5cf6/white?text=建國250週年海報位置",
+                qrKey: "USA05",
+                question: "美國建國 250 週年 (America250) 的核心慶祝精神是什麼？",
+                options: ["睡覺與休息", "多元、自由與未來", "買東西與購物", "考試與寫作業"],
+                answer: 1,
+                icon: "🎆"
+            }
+        ];
+
+        let gameState = {
+            completed: [false, false, false, false, false],
+            currentTask: null
+        };
+
+        function init() {
+            updateProgress();
+        }
+
+        // 點擊關卡卡片
+        function handleCardClick(index) {
+            if (gameState.completed[index]) {
+                showModal(`
+                    <div class="text-center p-4">
+                        <div class="text-6xl mb-4">💎</div>
+                        <h2 class="text-2xl font-bold text-blue-600 mb-2">歷史碎片已收集</h2>
+                        <p class="text-gray-600">你已經成功獲得了這一區的碎片！</p>
+                    </div>
+                `);
+                return;
+            }
+
+            gameState.currentTask = index;
+            const task = questData[index];
+            showModal(`
+                <div class="text-center">
+                    <h2 class="text-xl font-bold text-blue-800 mb-2">📍 第 ${index+1} 個碎片位置</h2>
+                    <p class="text-gray-600 text-sm mb-4">依照下方照片線索，去現場找尋答案吧！</p>
+                    <img src="${task.hintImage}" alt="提示照片" class="hint-img shadow-lg" onerror="this.src='https://placehold.co/600x400?text=照片載入中...'">
+                    <p class="text-base text-gray-800 font-bold mb-6">${task.hintTitle}</p>
+                    
+                    <div class="bg-blue-50 p-6 rounded-2xl border-2 border-blue-200">
+
+                        <div class="flex flex-col gap-2">
+                            <input type="text" id="modal-qr-input" placeholder="在此輸入答案" 
+                                class="w-full px-4 py-3 border-2 border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 uppercase font-bold text-center">
+                            <button onclick="checkPasscode(${index})" 
+                                class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg transition shadow-md">
+                                確認
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `);
+        }
+
+        // 檢查彈窗內的密碼
+        function checkPasscode(index) {
+            const input = document.getElementById('modal-qr-input').value.trim().toUpperCase();
+            if (!input) return;
+
+            const task = questData[index];
+            
+            if (input === task.qrKey) {
+                // 代碼正確，進入題目環節
+                showQuestion(index);
+            } else {
+                alert("❌ 代碼不正確！請確認你所在的地點是否正確，或是檢查代碼有沒有輸入錯誤喔。");
+            }
+        }
+
+        function showQuestion(index) {
+            gameState.currentTask = index;
+            const task = questData[index];
+            
+            let optionsHtml = task.options.map((opt, i) => `
+                <button onclick="checkAnswer(${i})" class="w-full text-left p-4 mb-3 border-2 border-gray-100 rounded-xl hover:border-blue-500 hover:bg-blue-50 transition active:scale-95">
+                    <span class="inline-block w-8 h-8 bg-blue-600 text-white rounded-full text-center leading-8 mr-3 font-bold">${i+1}</span>
+                    <span class="text-gray-700 font-medium">${opt}</span>
+                </button>
+            `).join('');
+
+            showModal(`
+                <div>
+                    <div class="flex items-center gap-2 mb-4">
+                        <span class="text-3xl">${task.icon}</span>
+                        <h2 class="text-xl font-bold">解鎖碎片任務：${index + 1}</h2>
+                    </div>
+                    <p class="text-lg text-gray-800 mb-6 font-bold leading-relaxed">${task.question}</p>
+                    <div class="space-y-1">
+                        ${optionsHtml}
+                    </div>
+                </div>
+            `);
+        }
+
+        function checkAnswer(selectedIndex) {
+            const task = questData[gameState.currentTask];
+            if (selectedIndex === task.answer) {
+                gameState.completed[gameState.currentTask] = true;
+                updateCardUI(gameState.currentTask);
+                updateProgress();
+                
+                showModal(`
+                    <div class="text-center p-4">
+                        <div class="text-6xl mb-4 animate-bounce">✨</div>
+                        <h2 class="text-2xl font-bold text-green-600 mb-2">正確答案！</h2>
+                        <p class="text-gray-600 mb-6">你獲得了一個歷史碎片！</p>
+                        <button onclick="closeModal()" class="bg-blue-600 text-white px-10 py-3 rounded-full font-bold shadow-lg transition active:scale-95">繼續探險</button>
+                    </div>
+                `);
+
+                checkGameWin();
+            } else {
+                alert("😢 哎呀，歷史紀錄似乎不是這樣喔。再試一次！");
+            }
+        }
+
+        function updateCardUI(index) {
+            const card = document.getElementById(`card-${index}`);
+            const status = document.getElementById(`status-${index}`);
+            
+            card.classList.remove('card-inactive');
+            card.classList.add('card-active', 'glow');
+            status.innerText = "碎片已收集 ✨";
+            status.classList.remove('text-gray-500');
+            status.classList.add('text-blue-600', 'font-bold');
+        }
+
+        function updateProgress() {
+            const doneCount = gameState.completed.filter(c => c).length;
+            const percent = (doneCount / 5) * 100;
+            document.getElementById('progress-bar').style.width = `${percent}%`;
+            document.getElementById('progress-text').innerText = `${doneCount} / 5`;
+        }
+
+        function checkGameWin() {
+            if (gameState.completed.every(c => c)) {
+                setTimeout(() => {
+                    document.getElementById('final-modal').classList.add('active');
+                }, 1000);
+            }
+        }
+
+        function showModal(content) {
+            document.getElementById('modal-content').innerHTML = content;
+            document.getElementById('modal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('modal').classList.remove('active');
+        }
+
+        function closeFinalModal() {
+            document.getElementById('final-modal').classList.remove('active');
+        }
+
+        window.onload = init;
+    </script>
+</body>
+</html>
