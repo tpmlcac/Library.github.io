@@ -6,23 +6,20 @@
     <title>圖書館探險家 - 美國 250 時空航行</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&display=swap');
         
         body {
             font-family: 'Noto Sans TC', sans-serif;
-            background-color: #f8fafc;
+            background-color: #f1f5f9;
         }
 
+        /* 闖關卡片樣式 */
         .card {
             transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             perspective: 1000px;
             cursor: pointer;
         }
-
-        .card-inactive {
-            filter: grayscale(100%) brightness(70%);
-        }
-
+        .card-inactive { filter: grayscale(100%) brightness(70%); }
         .card-active {
             filter: none;
             transform: scale(1.05);
@@ -30,109 +27,70 @@
             border: 4px solid #f59e0b !important;
         }
 
-        .glow {
-            animation: glow-pulse 2s infinite;
-        }
-
-        @keyframes glow-pulse {
-            0% { box-shadow: 0 0 5px #f59e0b; }
-            50% { box-shadow: 0 0 20px #fbbf24; }
-            100% { box-shadow: 0 0 5px #f59e0b; }
-        }
-
+        /* 模態框樣式 */
         .modal-overlay {
             display: none;
             position: fixed;
             inset: 0;
-            background: rgba(15, 23, 42, 0.9);
+            background: rgba(15, 23, 42, 0.95);
             z-index: 50;
             align-items: center;
             justify-content: center;
             padding: 20px;
+            backdrop-filter: blur(8px);
         }
+        .modal-overlay.active { display: flex; }
 
-        .modal-overlay.active {
+        /* 拉霸容器 (單一跳動框樣式) */
+        .slot-container {
+            height: 120px;
+            overflow: hidden;
+            position: relative;
+            background: #1e293b;
+            border-radius: 1.5rem;
+            border: 6px solid #f87171;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
+            transition: all 0.5s ease;
+        }
+        .slot-reel { transition: transform 3.5s cubic-bezier(0.15, 0, 0.15, 1); will-change: transform; }
+        .slot-item {
+            height: 120px;
             display: flex;
-        }
-
-        .hint-img {
-            width: 100%;
-            max-height: 250px;
-            object-fit: cover;
-            border-radius: 12px;
-            margin-bottom: 1rem;
-            border: 3px solid #e2e8f0;
-        }
-
-        .story-box {
-            background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            font-weight: 900;
             color: white;
+            white-space: nowrap;
         }
+        /* 中獎後的視覺增強 */
+        .is-winner {
+            border-color: #4ade80 !important;
+            background: #064e3b !important;
+            box-shadow: 0 0 30px rgba(74, 222, 128, 0.5);
+            animation: win-glow 1s infinite alternate;
+        }
+        @keyframes win-glow { from { transform: scale(1); } to { transform: scale(1.02); } }
+        .prize-text { font-size: 2rem !important; color: #facc15 !important; text-shadow: 0 0 15px rgba(250, 204, 21, 0.6); }
 
-        .error-shake {
-            animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
-        }
-
-        @keyframes shake {
-            10%, 90% { transform: translate3d(-1px, 0, 0); }
-            20%, 80% { transform: translate3d(2px, 0, 0); }
-            30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
-            40%, 60% { transform: translate3d(4px, 0, 0); }
-        }
-
-        /* 抽獎動畫相關 */
-        .slot-animation {
-            animation: slot-roll 0.1s infinite linear;
-        }
-
-        @keyframes slot-roll {
-            0% { transform: translateY(-5px); opacity: 0.7; }
-            50% { transform: translateY(5px); opacity: 1; }
-            100% { transform: translateY(-5px); opacity: 0.7; }
-        }
-
-        .prize-pop {
-            animation: prize-reveal 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-        }
-
-        @keyframes prize-reveal {
-            0% { transform: scale(0.5); opacity: 0; }
-            100% { transform: scale(1); opacity: 1; }
-        }
-
-        .floor-info {
-            background-color: #f0f9ff;
-            border-left: 4px solid #0ea5e9;
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 16px;
-            text-align: left;
-        }
+        .hint-img { width: 100%; max-height: 250px; object-fit: cover; border-radius: 12px; margin-bottom: 1rem; border: 3px solid #e2e8f0; }
+        .story-box { background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%); color: white; }
+        .glow { animation: glow-pulse 2s infinite; }
+        @keyframes glow-pulse { 0%, 100% { box-shadow: 0 0 5px #f59e0b; } 50% { box-shadow: 0 0 20px #fbbf24; } }
     </style>
-    <script>
-        window.isSubmitted = false;
-        window.handleIframeLoad = function() {
-            if (window.isSubmitted && typeof window.showResult === 'function') {
-                window.showResult();
-            }
-        };
-    </script>
 </head>
 <body class="min-h-screen pb-10">
 
-    <header class="story-box text-white py-8 px-6 shadow-xl text-center mb-8 relative overflow-hidden">
-        <div class="relative z-10">
-            <h1 class="text-3xl font-bold mb-2 text-white">時空探險家：解鎖 250 年的秘密</h1>
-            <div class="max-w-2xl mx-auto text-sm md:text-base opacity-90 leading-relaxed bg-black/20 p-4 rounded-lg inline-block">
-                探險家你好！我們收到一封來自 2027 年的求救信，<br>
-                美國建國 250 週年的「時空之鑰」碎成了五片，散落在圖書館各處。<br>
-                需要你運用觀察力找出碎片，開啟通往慶典的大門！
-            </div>
+    <header class="story-box text-white py-8 px-6 shadow-xl text-center mb-8 relative">
+        <h1 class="text-3xl font-bold mb-2">時空探險家：解鎖 250 年的秘密</h1>
+        <div class="max-w-2xl mx-auto text-sm opacity-90 bg-black/20 p-4 rounded-lg">
+            探險家你好！美國建國 250 週年的「時空之鑰」碎成了五片，散落在圖書館各處。<br>
+            請找出碎片，開啟通往慶典的大門！
         </div>
     </header>
 
     <main class="max-w-4xl mx-auto px-4">
-        <!-- Progress -->
+        <!-- 進度條 -->
         <div class="mb-8 bg-white p-4 rounded-xl shadow-sm border border-gray-100">
             <div class="flex justify-between mb-2">
                 <span class="text-sm font-medium text-blue-700">歷史碎片收集進度</span>
@@ -143,317 +101,287 @@
             </div>
         </div>
 
-        <!-- Grid -->
+        <!-- 碎片網格 -->
         <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-10">
             <div id="card-0" onclick="handleCardClick(0)" class="card card-inactive bg-white rounded-2xl p-4 flex flex-col items-center text-center shadow-md border-2 border-transparent">
                 <div class="text-4xl mb-2">🚢</div>
-                <div class="font-bold text-sm md:text-base">航向新世界</div>
-                <div id="status-0" class="text-xs mt-2 text-gray-500">尋找碎片 1</div>
+                <div class="font-bold text-sm">航向新世界</div>
+                <div id="status-0" class="text-xs mt-2 text-gray-500">碎片 1</div>
             </div>
             <div id="card-1" onclick="handleCardClick(1)" class="card card-inactive bg-white rounded-2xl p-4 flex flex-col items-center text-center shadow-md border-2 border-transparent">
                 <div class="text-4xl mb-2">⚡</div>
-                <div class="font-bold text-sm md:text-base">富蘭克林的風箏</div>
-                <div id="status-1" class="text-xs mt-2 text-gray-500">尋找碎片 2</div>
+                <div class="font-bold text-sm">富蘭克林</div>
+                <div id="status-1" class="text-xs mt-2 text-gray-500">碎片 2</div>
             </div>
             <div id="card-2" onclick="handleCardClick(2)" class="card card-inactive bg-white rounded-2xl p-4 flex flex-col items-center text-center shadow-md border-2 border-transparent">
                 <div class="text-4xl mb-2">📜</div>
-                <div class="font-bold text-sm md:text-base">自由的宣言</div>
-                <div id="status-2" class="text-xs mt-2 text-gray-500">尋找碎片 3</div>
+                <div class="font-bold text-sm">自由的宣言</div>
+                <div id="status-2" class="text-xs mt-2 text-gray-500">碎片 3</div>
             </div>
             <div id="card-3" onclick="handleCardClick(3)" class="card card-inactive bg-white rounded-2xl p-4 flex flex-col items-center text-center shadow-md border-2 border-transparent">
                 <div class="text-4xl mb-2">🚀</div>
-                <div class="font-bold text-sm md:text-base">創新與科技</div>
-                <div id="status-3" class="text-xs mt-2 text-gray-500">尋找碎片 4</div>
+                <div class="font-bold text-sm">創新與科技</div>
+                <div id="status-3" class="text-xs mt-2 text-gray-500">碎片 4</div>
             </div>
             <div id="card-4" onclick="handleCardClick(4)" class="card card-inactive bg-white rounded-2xl p-4 flex flex-col items-center text-center shadow-md border-2 border-transparent">
                 <div class="text-4xl mb-2">🎆</div>
-                <div class="font-bold text-sm md:text-base">慶祝 250 週年</div>
-                <div id="status-4" class="text-xs mt-2 text-gray-500">尋找碎片 5</div>
+                <div class="font-bold text-sm">250 週年</div>
+                <div id="status-4" class="text-xs mt-2 text-gray-500">碎片 5</div>
             </div>
         </div>
     </main>
 
-    <!-- Modals -->
+    <!-- 一般闖關 Modal -->
     <div id="modal" class="modal-overlay">
         <div id="modal-container" class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl relative overflow-y-auto max-h-[90vh]">
-            <button onclick="closeModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 z-10 bg-white rounded-full p-1 shadow">✕</button>
+            <button onclick="closeModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 z-10">✕</button>
             <div id="modal-content"></div>
         </div>
     </div>
 
+    <!-- 最後核銷與抽獎 Modal -->
     <div id="final-modal" class="modal-overlay">
-        <div class="bg-white rounded-3xl max-w-md w-full shadow-2xl overflow-hidden border-4 border-blue-900">
-            <div class="bg-blue-900 p-6 text-center">
-                <h2 class="text-white text-xl font-bold tracking-widest">時空之鑰已修復！</h2>
+        <div class="bg-white rounded-[2.5rem] max-w-md w-full shadow-2xl overflow-hidden border-8 border-slate-900">
+            <div class="bg-slate-900 p-6 text-center">
+                <h2 class="text-yellow-400 text-xl font-black italic tracking-widest uppercase">AMERICA 250 REWARD</h2>
             </div>
             
+            <!-- 填寫資料 -->
             <div id="final-step-1" class="p-8 text-center">
                 <div class="text-5xl mb-4">🎊</div>
-                <p class="text-slate-600 mb-6 text-sm">請填寫基本資料，領取榮耀獎勵！</p>
-                <div class="space-y-4 mb-6 text-left">
-                    <input type="text" id="userName" placeholder="探險家姓名" class="w-full bg-slate-100 border-none p-4 rounded-xl focus:ring-2 ring-blue-500 outline-none">
-                    <div class="flex gap-2">
-                        <select id="userGender" class="w-full bg-slate-100 border-none p-4 rounded-xl focus:ring-2 ring-blue-500 outline-none">
-                            <option value="">選擇性別</option>
+                <h3 class="text-xl font-bold mb-6">探險成功！請填寫資料</h3>
+                <div class="space-y-4 mb-8 text-left">
+                    <input type="text" id="userName" placeholder="探險家姓名" class="w-full bg-slate-100 border-4 border-slate-200 p-4 rounded-2xl outline-none focus:border-blue-500 font-bold">
+                    <div class="flex gap-3">
+                        <select id="userGender" class="w-1/3 bg-slate-100 border-4 border-slate-200 p-4 rounded-2xl outline-none focus:border-blue-500 font-bold">
+                            <option value="">性別</option>
                             <option value="男">男</option>
                             <option value="女">女</option>
                         </select>
-                        <input type="tel" id="userPhone" maxlength="3" placeholder="手機末三碼" class="w-full bg-slate-100 border-none p-4 rounded-xl focus:ring-2 ring-blue-500 text-center outline-none">
+                        <input type="tel" id="userPhone" placeholder="電話號碼" class="w-2/3 bg-slate-100 border-4 border-slate-200 p-4 rounded-2xl outline-none focus:border-blue-500 font-bold text-center">
                     </div>
                 </div>
-                <button onclick="goToStaff()" class="w-full bg-blue-700 hover:bg-blue-800 text-white font-bold py-4 rounded-xl shadow-lg transition">前往櫃檯核銷</button>
+                <button onclick="goToStaff()" class="w-full bg-blue-600 text-white font-black py-5 rounded-3xl text-xl shadow-[0_8px_0_#1e3a8a] active:translate-y-1 active:shadow-none transition-all">
+                    下一步：前往櫃檯 ➔
+                </button>
             </div>
 
+            <!-- 館員核銷 -->
             <div id="final-step-2" class="hidden p-8 text-center space-y-4">
-                <div class="text-5xl">🔐</div>
-                <h3 class="text-xl font-bold text-amber-600">館員核銷確認</h3>
-                <p class="text-slate-500 text-xs">請將手機交給櫃檯人員進行核銷。</p>
-                <div class="bg-amber-50 p-6 rounded-2xl border border-amber-200 space-y-4">
-                    <input type="password" id="admin-pass" placeholder="請輸入核銷碼" class="w-full bg-white border-2 border-amber-200 p-4 rounded-xl text-center font-bold outline-none">
-                    <button onclick="verifyStaff()" class="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-4 rounded-xl shadow-md">確認核銷</button>
+                <div class="text-5xl">👮</div>
+                <h3 class="text-2xl font-black text-red-600">海關核銷檢查</h3>
+                <p class="text-slate-500 font-bold">請館員老師輸入解鎖密碼</p>
+                <div class="bg-slate-900 p-8 rounded-[2rem] space-y-4">
+                    <input type="password" id="admin-pass" maxlength="3" placeholder="密碼" class="w-full bg-white border-4 border-blue-400 p-4 rounded-2xl text-center font-black text-4xl outline-none">
+                    <button onclick="verifyStaff()" class="w-full bg-yellow-400 text-slate-900 font-black py-4 rounded-2xl text-xl shadow-[0_6px_0_#b45309] active:translate-y-1 active:shadow-none transition-all">
+                        開啟抽獎裝置
+                    </button>
                 </div>
+                <button onclick="resetToStep1()" class="text-slate-400 font-bold text-sm underline">回上一步</button>
             </div>
 
+            <!-- 單一抽獎框 -->
             <div id="final-step-3" class="hidden p-8 text-center space-y-6">
-                <!-- 抽獎顯示區 -->
-                <div class="relative h-40 flex items-center justify-center overflow-hidden bg-slate-50 rounded-2xl border-2 border-slate-200">
-                    <div id="slot-container" class="text-center">
-                        <div id="p-icon" class="text-7xl mb-2">🎁</div>
-                        <div id="slot-text" class="text-2xl font-black text-slate-400">準備抽取...</div>
-                    </div>
-                    
-                    <!-- 結果顯示區 (初始隱藏) -->
-                    <div id="p-res-box" class="hidden absolute inset-0 bg-emerald-50 flex flex-col items-center justify-center prize-pop border-2 border-emerald-400 rounded-2xl">
-                        <span class="text-emerald-600 text-xs font-bold block mb-1">🎊 獲得獎項 🎊</span>
-                        <h3 id="p-name" class="text-3xl font-black text-slate-800"></h3>
-                        <p class="text-emerald-700 text-xs mt-2 font-medium">數據已傳輸至總部</p>
-                    </div>
+                <h2 id="draw-title" class="text-2xl font-black text-slate-800">🇺🇸 幸運大轉盤 🇺🇸</h2>
+
+                <div id="main-slot" class="slot-container relative">
+                    <!-- 橫線已移除 -->
+                    <div id="reel" class="slot-reel"></div>
                 </div>
 
-                <button id="draw-btn" onclick="startDrawEffect()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-5 rounded-xl text-xl shadow-xl transition transform active:scale-95">抽取時空獎勵</button>
+                <button id="draw-btn" onclick="startSlotMachine()" class="w-full bg-red-500 hover:bg-red-600 text-white font-black py-5 rounded-[2rem] text-2xl shadow-[0_10px_0_#991b1b] active:translate-y-2 active:shadow-none transition-all">
+                    啟動！GO!
+                </button>
                 
-                <p id="draw-hint" class="text-slate-400 text-xs">點擊按鈕開始隨機抽選</p>
+                <div id="final-message" class="hidden text-green-600 font-black text-lg animate-bounce mt-4">🎊 請找館員領取獎項 🎊</div>
+                <p id="submit-status" class="text-xs font-bold text-slate-400">裝置已待命...</p>
             </div>
         </div>
     </div>
 
-    <!-- Hidden Form -->
-    <iframe name="hidden_iframe" id="hidden_iframe" style="display:none;" onload="if(window.handleIframeLoad) window.handleIframeLoad()"></iframe>
-    <form id="google_form" action="https://docs.google.com/forms/u/0/d/e/1FAIpQLSdg6LfPyeAu4DxLISW2WZrHmxoOQxsX_Pt6yN707eS8yDk9kg/formResponse" method="POST" target="hidden_iframe" style="display:none;">
-        <input type="hidden" name="entry.1113228551" id="entry_name">
-        <input type="hidden" name="entry.1705607062" id="entry_gender">
-        <input type="hidden" name="entry.423374402" id="entry_phone">
-        <input type="hidden" name="entry.1443014865" id="entry_prize">
-    </form>
-
     <script>
         const ADMIN_CODE = "888";
-        const PRIZE_POOL = ["隨身夾", "手提袋", "紀念徽章"];
-        let finalPrize = "";
+        // GAS 連結
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz8hkaLz4VwugcciBIKQnJMald50OYoHLxYQYU01iGL2Lcbt9QCi9VKySFwI8rYsrYphA/exec";
+        
+        const PRIZE_POOL = [
+            { name: "🎁 隨身夾", weight: 40 },
+            { name: "🥤 杯套", weight: 30 },
+            { name: "✨ 紀念徽章", weight: 30 }
+        ];
+        const DECOR_ICONS = ["🇺🇸", "🦅", "🗽", "⚾", "🍎", "🪐", "🎸", "🤠", "籃球", "🍔"];
+        const REEL_COUNT = 50;
 
         const questData = [
-            {
-                floorName: "1樓：入館大廳與服務區",
-                floorIntro: "這裡是探險的第一站，提供辦證、借還書服務，還有各種精彩的主題書展在這裡展出喔！",
-                hintTitle: "故事的起點：在1樓找找，今年寒假閱讀節是介紹哪個國家呢？",
-                hintImage: "https://lh3.googleusercontent.com/u/0/d/14063RDGtNvicj-CV7w5ZGm-HQkSEjNHR", 
-                qrKey: "泰國",
-                question: "寒假閱讀節的主題是？",
-                options: ["「泰」想見你", "「泰」享閱讀", "「泰」會讀書", "「泰」度決定一切"],
-                answer: 1,
-                icon: "🚢"
-            },
-            {
-                floorName: "B1：兒童圖書館、吳大猷書房",
-                floorIntro: "這裡是小朋友的秘密基地！有豐富的中文故事書、科學書，還有專門為小朋友設計的閱讀空間。",
-                hintTitle: "科學與觀察：前往B1找找這個人是誰？",
-                hintImage: "https://lh3.googleusercontent.com/u/0/d/1OpoBd-w7bm7dYv7bCXFj72MlkiXUP_g9",
-                qrKey: "吳大猷",
-                question: "位於北市圖總館B1的兒童室，每週二～六的開放時間是幾點呢？",
-                options: ["09:00-17:00", "09:00-21:00", "09:00-18:00", "08:30-21:00"],
-                answer: 2,
-                icon: "⚡"
-            },
-            {
-                floorName: "9樓：多元文化資料中心",
-                floorIntro: "中心裡分成8個區域，分別代表不同國家，可以來這裡探索不同國家有趣的故事和知識！",
-                hintTitle: "自由的宣言：抵達9樓，大門一打開看到的國家是哪裡呢？",
-                hintImage: "https://placehold.co/600x400/ef4444/white?text=9樓多元文化區",
-                qrKey: "泰國",
-                question: "國旗三角形的一邊有三顆星與太陽，右側是藍紅兩色。請問是哪個國家呢？",
-                options: ["韓國", "緬甸", "泰國", "菲律賓"],
-                answer: 3,
-                icon: "📜"
-            },
-            {
-                floorName: "8樓：視聽室",
-                floorIntro: "除了可外借資料，也設有視聽內閱區。還有定期放映熱門電影和舉辦音樂、電影講座。",
-                hintTitle: "邁向未來：前往8樓視聽室，你看到的是什麼呢？",
-                hintImage: "https://placehold.co/600x400/10b981/white?text=8樓視聽室",
-                qrKey: "團體欣賞室",
-                question: "在臺北市立圖書館，外借視聽資料借期是幾天？還可再續借幾次呢？",
-                options: ["14天，2次", "14天，3次", "30天，2次", "30天，3次"],
-                answer: 1,
-                icon: "🚀"
-            },
-            {
-                floorName: "3樓：美國資料中心",
-                floorIntro: "探險的終點來到3樓美國資料中心，這裡正舉辦「美國建國 250 週年 (America250)」特別展覽。",
-                hintTitle: "250 週年特展：請找到 America250 特展海報，觀察海報上的精神標語。",
-                hintImage: "https://placehold.co/600x400/8b5cf6/white?text=3樓特展海報",
-                qrKey: "05",
-                question: "美國建國 250 週年 (America250) 的核心慶祝精神是什麼？",
-                options: ["睡覺與休息", "多元、自由與未來", "買東西與購物", "考試與寫作業"],
-                answer: 1,
-                icon: "🎆"
-            }
+            { floorName: "1樓：入館大廳與服務區", floorIntro: "這裡是探險的第一站，提供辦證、借還書服務。", hintTitle: "故事的起點：1樓寒假閱讀節是介紹哪個國家？", hintImage: "https://lh3.googleusercontent.com/u/0/d/14063RDGtNvicj-CV7w5ZGm-HQkSEjNHR", qrKey: "泰國", question: "寒假閱讀節的主題是？", options: ["「泰」想見你", "「泰」享閱讀", "「泰」會讀書", "「泰」度決定一切"], answer: 1, icon: "🚢" },
+            { floorName: "B1：兒童圖書館", floorIntro: "這裡是小朋友的秘密基地！有豐富的故事書。", hintTitle: "科學與觀察：前往B1找找這個人是誰？", hintImage: "https://lh3.googleusercontent.com/u/0/d/1OpoBd-w7bm7dYv7bCXFj72MlkiXUP_g9", qrKey: "吳大猷", question: "兒童室每週二～六的開放時間是？", options: ["09:00-17:00", "09:00-21:00", "09:00-18:00", "08:30-21:00"], answer: 2, icon: "⚡" },
+            { floorName: "9樓：多元文化資料中心", floorIntro: "中心代表不同國家，探索有趣的跨文化知識！", hintTitle: "自由的宣言：9樓大門打開看到的國家是？", hintImage: "https://placehold.co/600x400/ef4444/white?text=9樓多元文化區", qrKey: "泰國", question: "國旗三角形三顆星與太陽，右側藍紅兩色是哪國？", options: ["韓國", "緬甸", "泰國", "菲律賓"], answer: 3, icon: "📜" },
+            { floorName: "8樓：視聽室", floorIntro: "可借閱資料與欣賞電影。", hintTitle: "邁向未來：前往8樓視聽室，看到的是什麼？", hintImage: "https://placehold.co/600x400/10b981/white?text=8樓視聽室", qrKey: "團體欣賞室", question: "外借視聽資料借期是幾天？可續借幾次？", options: ["14天，2次", "14天，3次", "30天，2次", "30天，3次"], answer: 1, icon: "🚀" },
+            { floorName: "3樓：美國資料中心", floorIntro: "探險終點！America250 特別展覽。", hintTitle: "找到 America250 特展海報觀察標語。", hintImage: "https://placehold.co/600x400/8b5cf6/white?text=3樓特展海報", qrKey: "05", question: "America250 的核心慶祝精神是什麼？", options: ["睡覺與休息", "多元、自由與未來", "買東西與購物", "考試與寫作業"], answer: 1, icon: "🎆" }
         ];
 
-        let gameState = {
-            completed: [false, false, false, false, false],
-            currentTask: null
-        };
+        let gameState = { completed: [false, false, false, false, false], currentTask: null };
 
-        function init() { updateProgress(); }
+        function init() {
+            updateProgress();
+            initReel();
+        }
 
-        function handleCardClick(index) {
-            if (gameState.completed[index]) {
-                showModal(`<div class="text-center p-4"><div class="text-6xl mb-4">💎</div><h2 class="text-2xl font-bold text-blue-600 mb-2">歷史碎片已收集</h2><p class="text-gray-600">你已經成功獲得了這一區的碎片！</p></div>`);
-                return;
+        function initReel() {
+            const reel = document.getElementById('reel');
+            reel.innerHTML = '';
+            for(let i=0; i<REEL_COUNT; i++) {
+                const div = document.createElement('div');
+                div.className = 'slot-item';
+                div.innerText = DECOR_ICONS[i % DECOR_ICONS.length];
+                reel.appendChild(div);
             }
-            gameState.currentTask = index;
-            const task = questData[index];
+        }
+
+        function handleCardClick(i) {
+            if (gameState.completed[i]) return showModal(`<div class="text-center p-4"><div class="text-6xl mb-4">💎</div><h2 class="text-2xl font-bold text-blue-600">碎片已收集</h2></div>`);
+            gameState.currentTask = i;
+            const task = questData[i];
             showModal(`
                 <div class="text-center">
-                    <h2 class="text-xl font-bold text-blue-800 mb-2">📍 第 ${index+1} 個碎片位置</h2>
-                    <img src="${task.hintImage}" alt="提示照片" class="hint-img shadow-lg" onerror="this.src='https://placehold.co/600x400?text=照片載入中...'">
-                    <p class="text-base text-gray-800 font-bold mb-6">${task.hintTitle}</p>
+                    <h2 class="text-xl font-bold text-blue-800 mb-2">📍 第 ${i+1} 個碎片位置</h2>
+                    <img src="${task.hintImage}" class="hint-img shadow-lg" onerror="this.src='https://placehold.co/600x400?text=照片載入中...'">
+                    <p class="font-bold mb-4 text-gray-700">${task.hintTitle}</p>
                     <div class="bg-blue-50 p-6 rounded-2xl border-2 border-blue-200">
-                        <input type="text" id="modal-qr-input" placeholder="在此輸入答案" class="w-full px-4 py-3 border-2 border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 uppercase font-bold text-center mb-2">
+                        <input type="text" id="modal-qr-input" placeholder="輸入答案" class="w-full p-4 border-2 rounded-xl text-center mb-2 font-bold uppercase outline-none focus:border-blue-500">
                         <div id="error-msg" class="text-red-500 text-xs font-bold hidden mb-2">❌ 答案不正確！</div>
-                        <button onclick="checkPasscode(${index})" class="w-full bg-blue-600 text-white font-bold py-3 rounded-lg shadow-md">確認</button>
+                        <button onclick="checkPasscode(${i})" class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl">確認</button>
                     </div>
                 </div>
             `);
         }
 
-        function checkPasscode(index) {
-            const input = document.getElementById('modal-qr-input').value.trim().toUpperCase();
-            if (input === questData[index].qrKey.toUpperCase()) { showQuestion(index); }
-            else { document.getElementById('error-msg').classList.remove('hidden'); }
+        function checkPasscode(i) {
+            const val = document.getElementById('modal-qr-input').value.trim().toUpperCase();
+            if (val === questData[i].qrKey.toUpperCase()) showQuestion(i);
+            else document.getElementById('error-msg').classList.remove('hidden');
         }
 
-        function showQuestion(index) {
-            const task = questData[index];
-            let optionsHtml = task.options.map((opt, i) => `<button onclick="checkAnswer(${i})" class="w-full text-left p-4 mb-3 border-2 border-gray-100 rounded-xl hover:border-blue-500 hover:bg-blue-50 active:scale-95"><span class="inline-block w-8 h-8 bg-blue-600 text-white rounded-full text-center leading-8 mr-3 font-bold">${i+1}</span><span class="text-gray-700">${opt}</span></button>`).join('');
-            showModal(`<div><div class="flex items-center gap-2 mb-2"><span class="text-3xl">${task.icon}</span><h2 class="text-xl font-bold">碎片任務：${index + 1}</h2></div><div class="floor-info"><p class="text-sm text-sky-900">${task.floorIntro}</p></div><p class="text-lg text-gray-800 mb-6 font-bold">${task.question}</p><div id="quiz-error" class="hidden bg-red-100 text-red-600 p-2 rounded-lg mb-4 text-center">❌ 答案不正確！</div><div>${optionsHtml}</div></div>`);
+        function showQuestion(i) {
+            const task = questData[i];
+            let opts = task.options.map((opt, idx) => `<button onclick="checkAnswer(${idx})" class="w-full text-left p-4 mb-3 border-2 border-gray-100 rounded-xl hover:border-blue-500 hover:bg-blue-50 transition"><span class="inline-block w-8 h-8 bg-blue-600 text-white rounded-full text-center leading-8 mr-3 font-bold">${idx+1}</span>${opt}</button>`).join('');
+            showModal(`<div><div class="flex items-center gap-2 mb-4"><span class="text-3xl">${task.icon}</span><h2 class="text-xl font-bold">任務 ${i+1}</h2></div><p class="text-lg font-bold mb-6">${task.question}</p><div id="quiz-error" class="hidden text-red-600 mb-4 text-center">❌ 答案不正確！</div>${opts}</div>`);
         }
 
-        function checkAnswer(selectedIndex) {
-            if (selectedIndex === questData[gameState.currentTask].answer) {
+        function checkAnswer(idx) {
+            if (idx === questData[gameState.currentTask].answer) {
                 gameState.completed[gameState.currentTask] = true;
                 updateCardUI(gameState.currentTask);
                 updateProgress();
-                showModal(`<div class="text-center p-4"><div class="text-6xl mb-4 animate-bounce">✨</div><h2 class="text-2xl font-bold text-green-600 mb-2">正確答案！</h2><button onclick="closeModal()" class="bg-blue-600 text-white px-10 py-3 rounded-full font-bold">繼續探險</button></div>`);
-                checkGameWin();
-            } else { document.getElementById('quiz-error').classList.remove('hidden'); }
+                showModal(`<div class="text-center p-4"><div class="text-6xl mb-4 animate-bounce">✨</div><h2 class="text-2xl font-bold text-green-600">正確答案！</h2><button onclick="closeModal()" class="mt-4 bg-blue-600 text-white px-8 py-3 rounded-full font-bold">繼續探險</button></div>`);
+                if (gameState.completed.every(c => c)) setTimeout(() => document.getElementById('final-modal').classList.add('active'), 1000);
+            } else document.getElementById('quiz-error').classList.remove('hidden');
         }
 
-        function updateCardUI(index) {
-            const card = document.getElementById(`card-${index}`);
-            const status = document.getElementById(`status-${index}`);
-            card.classList.remove('card-inactive');
-            card.classList.add('card-active', 'glow');
-            status.innerText = "碎片已收集 ✨";
-            status.classList.add('text-blue-600', 'font-bold');
+        function updateCardUI(i) {
+            const c = document.getElementById(`card-${i}`);
+            c.classList.remove('card-inactive');
+            c.classList.add('card-active', 'glow');
+            document.getElementById(`status-${i}`).innerText = "已收集 ✨";
         }
 
         function updateProgress() {
-            const doneCount = gameState.completed.filter(c => c).length;
-            document.getElementById('progress-bar').style.width = `${(doneCount / 5) * 100}%`;
-            document.getElementById('progress-text').innerText = `${doneCount} / 5`;
+            const count = gameState.completed.filter(c => c).length;
+            const bar = document.getElementById('progress-bar');
+            if(bar) bar.style.width = `${(count / 5) * 100}%`;
+            const text = document.getElementById('progress-text');
+            if(text) text.innerText = `${count} / 5`;
         }
-
-        function checkGameWin() { if (gameState.completed.every(c => c)) setTimeout(() => document.getElementById('final-modal').classList.add('active'), 1000); }
 
         function goToStaff() {
             const n = document.getElementById('userName').value.trim();
-            const g = document.getElementById('userGender').value;
             const p = document.getElementById('userPhone').value.trim();
-            if(!n || !g || !p) { alert("請填寫所有資料！"); return; }
+            if (!n || !p) return alert("請填寫姓名與電話！");
             document.getElementById('final-step-1').classList.add('hidden');
             document.getElementById('final-step-2').classList.remove('hidden');
         }
 
+        function resetToStep1() {
+            document.getElementById('final-step-2').classList.add('hidden');
+            document.getElementById('final-step-1').classList.remove('hidden');
+        }
+
         function verifyStaff() {
-            if(document.getElementById('admin-pass').value === ADMIN_CODE) {
+            if (document.getElementById('admin-pass').value === ADMIN_CODE) {
                 document.getElementById('final-step-2').classList.add('hidden');
                 document.getElementById('final-step-3').classList.remove('hidden');
-            } else { alert("核銷碼錯誤！"); }
+            } else alert("核銷密碼錯誤！");
         }
 
-        // --- 抽獎動畫邏輯 ---
-        function startDrawEffect() {
+        function startSlotMachine() {
             const btn = document.getElementById('draw-btn');
-            const slotText = document.getElementById('slot-text');
-            const slotContainer = document.getElementById('slot-container');
-            const hint = document.getElementById('draw-hint');
+            const mainSlot = document.getElementById('main-slot');
+            const reel = document.getElementById('reel');
             
             btn.disabled = true;
-            btn.classList.add('opacity-50', 'cursor-not-allowed');
-            hint.innerText = "抽選中，請屏息以待...";
-            
-            // 開始轉動動畫
-            slotContainer.classList.add('slot-animation');
-            
-            let counter = 0;
-            const duration = 2000; // 滾動時間 2.5 秒
-            const intervalTime = 80;
-            
-            const rollInterval = setInterval(() => {
-                slotText.innerText = PRIZE_POOL[counter % PRIZE_POOL.length];
-                counter++;
-            }, intervalTime);
+            btn.style.opacity = "0.5";
+            btn.innerText = "轉動中...";
+            document.getElementById('submit-status').innerText = "數據發送中...";
 
-            // 結束轉動
+            const random = Math.random() * 100;
+            let cumulative = 0;
+            let winPrize = "";
+            for (const p of PRIZE_POOL) {
+                cumulative += p.weight;
+                if (random <= cumulative) { winPrize = p.name; break; }
+            }
+
+            submitData(winPrize);
+
+            const stopIdx = REEL_COUNT - 3;
+            const stopItem = reel.children[stopIdx];
+            reel.style.transform = `translateY(-${stopIdx * 120}px)`;
+
             setTimeout(() => {
-                clearInterval(rollInterval);
-                slotContainer.classList.remove('slot-animation');
-                
-                // 決定最終結果
-                finalPrize = PRIZE_POOL[Math.floor(Math.random() * PRIZE_POOL.length)];
-                
-                // 正式提交數據
-                submitData(finalPrize);
-            }, duration);
+                stopItem.innerText = winPrize;
+                stopItem.classList.add('prize-text');
+            }, 2500);
+
+            setTimeout(() => {
+                mainSlot.classList.add('is-winner');
+                document.getElementById('final-message').classList.remove('hidden');
+                document.getElementById('draw-title').innerText = "✨ 恭喜獲獎 ✨";
+                btn.style.display = 'none';
+            }, 3600);
         }
 
-        function submitData(prize) {
-            document.getElementById('entry_name').value = document.getElementById('userName').value;
-            document.getElementById('entry_gender').value = document.getElementById('userGender').value;
-            document.getElementById('entry_phone').value = document.getElementById('userPhone').value;
-            document.getElementById('entry_prize').value = prize;
+        async function submitData(prize) {
+            const userName = document.getElementById('userName').value;
+            const userGender = document.getElementById('userGender').value;
+            const userPhone = document.getElementById('userPhone').value;
+            const statusLabel = document.getElementById('submit-status');
 
-            window.isSubmitted = true;
-            document.getElementById('google_form').submit();
-            
-            // 延遲一點點顯示結果，增加驚喜感
-            setTimeout(() => {
-                window.showResult();
-            }, 500);
+            const formData = new URLSearchParams();
+            formData.append('name', userName);
+            formData.append('gender', userGender);
+            formData.append('phone', userPhone);
+            formData.append('prize', prize);
+
+            try {
+                await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    cache: 'no-cache',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: formData
+                });
+                
+                statusLabel.innerText = "✅ 數據已發送至試算表";
+                statusLabel.classList.add('text-green-600');
+            } catch (error) {
+                statusLabel.innerText = "⚠️ 網路傳輸異常，請館員檢查試算表";
+                statusLabel.classList.add('text-red-500');
+            }
         }
-
-        window.showResult = function() {
-            if (!window.isSubmitted) return;
-            document.getElementById('p-name').innerText = finalPrize;
-            document.getElementById('p-res-box').classList.remove('hidden');
-            document.getElementById('draw-btn').style.display = 'none';
-            document.getElementById('draw-hint').style.display = 'none';
-            window.isSubmitted = false;
-        };
 
         function showModal(content) { document.getElementById('modal-content').innerHTML = content; document.getElementById('modal').classList.add('active'); }
         function closeModal() { document.getElementById('modal').classList.remove('active'); }
+        
         window.onload = init;
     </script>
 </body>
