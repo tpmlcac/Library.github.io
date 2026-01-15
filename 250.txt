@@ -11,6 +11,11 @@
         body {
             font-family: 'Noto Sans TC', sans-serif;
             background-color: #f1f5f9;
+            /* 禁止選取文字 */
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
         }
 
         /* 闖關卡片樣式 */
@@ -72,13 +77,21 @@
         @keyframes win-glow { from { transform: scale(1); } to { transform: scale(1.02); } }
         .prize-text { font-size: 2rem !important; color: #facc15 !important; text-shadow: 0 0 15px rgba(250, 204, 21, 0.6); }
 
-        .hint-img { width: 100%; max-height: 250px; object-fit: cover; border-radius: 12px; margin-bottom: 1rem; border: 3px solid #e2e8f0; }
+        /* 照片 1:1 比例 */
+        .hint-img { 
+            width: 100%; 
+            aspect-ratio: 1 / 1; 
+            object-fit: cover; 
+            border-radius: 12px; 
+            margin-bottom: 1rem; 
+            border: 3px solid #e2e8f0; 
+        }
         .story-box { background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%); color: white; }
         .glow { animation: glow-pulse 2s infinite; }
         @keyframes glow-pulse { 0%, 100% { box-shadow: 0 0 5px #f59e0b; } 50% { box-shadow: 0 0 20px #fbbf24; } }
     </style>
 </head>
-<body class="min-h-screen pb-10">
+<body class="min-h-screen pb-10" oncontextmenu="return false" ondragstart="return false" onselectstart="return false">
 
     <header class="story-box text-white py-8 px-6 shadow-xl text-center mb-8 relative">
         <h1 class="text-3xl font-bold mb-2">時空探險家：解鎖 250 年的秘密</h1>
@@ -199,6 +212,17 @@
     </div>
 
     <script>
+        // 禁止右鍵與特定快速鍵
+        document.addEventListener('keydown', function(e) {
+            // 阻擋 F12, Ctrl+Shift+I, Ctrl+U, Ctrl+C
+            if (e.keyCode == 123 || 
+                (e.ctrlKey && e.shiftKey && (e.keyCode == 73 || e.keyCode == 74)) || 
+                (e.ctrlKey && (e.keyCode == 85 || e.keyCode == 67 || e.keyCode == 83))) {
+                e.preventDefault();
+                return false;
+            }
+        });
+
         const ADMIN_CODE = "888";
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz8hkaLz4VwugcciBIKQnJMald50OYoHLxYQYU01iGL2Lcbt9QCi9VKySFwI8rYsrYphA/exec";
         
@@ -210,12 +234,13 @@
         const DECOR_ICONS = ["🦅", "🗽", "⚾", "🍎", "🪐", "🎸", "🤠","🍔"];
         const REEL_COUNT = 50;
 
+        // 題目資料庫
         const questData = [
-            { floorName: "1F：入館大廳與服務區", floorIntro: "這裡是探險的第一站，提供辦證、借還書服務，還有各種精彩的主題書展在這裡展出喔！是讀者與書籍相遇的起始點，充滿了探索的可能。", hintTitle: "故事的起點：找找今年寒假閱讀節是介紹哪個國家呢？", hintImage: "https://lh3.googleusercontent.com/u/0/d/14063RDGtNvicj-CV7w5ZGm-HQkSEjNHR", qrKey: "泰國", question: "今年寒假閱讀節的主題是？", options: ["「泰」想見你", "「泰」享閱讀", "「泰」會讀書", "「泰」度決定一切"], answer: 1, icon: "🚢" },
-            { floorName: "B1：兒童室、吳大猷書房, B2：小小世界外文圖書館", floorIntro: "這裡是小朋友的秘密基地！有豐富的故事書、繪本以及專為兒童設計的閱讀空間，讓孩子在書海中展開奇幻冒險。", hintTitle: "科學與觀察：前往B1找找這個人是誰？", hintImage: "https://lh3.googleusercontent.com/u/0/d/1OpoBd-w7bm7dYv7bCXFj72MlkiXUP_g9", qrKey: "吳大猷", question: "兒童室每週二～六的開放時間是？", options: ["09:00-17:00", "09:00-21:00", "09:00-18:00", "08:30-21:00"], answer: 2, icon: "⚡" },
-            { floorName: "9F：多元文化資料中心", floorIntro: "中心裡分成8個區域，分別代表不同國家，展示了來自世界各地的文化縮影，透過不同語文的藏書與展覽，帶領你跨越國界，體驗有趣的跨文化知識。", hintTitle: "自由的宣言：位於9樓櫃檯前方的書架是哪個國家的專區呢？", hintImage: "https://placehold.co/600x400/ef4444/white?text=9樓多元文化區", qrKey: "泰國", question: "國旗的一邊是等邊三角形，每個角都有一顆星星，三角形的中央有一個太陽，三角形的右側是藍紅兩色。請問是哪個國家呢？", options: ["韓國", "緬甸", "泰國", "菲律賓"], answer: 3, icon: "📜" },
-            { floorName: "8F：視聽室", floorIntro: "在這裡，故事不只在書本裡，更在螢幕與耳機中。視聽室提供豐富的影音資料借閱，並設有視聽內閱區，3人以上還可登記使用如同包廂式的親子欣賞室。此外，還會定期放映熱門電影和舉辦音樂、電影講座及收看串流影音服務，歡迎大朋友小朋友來免費欣賞。", hintTitle: "邁向未來：前往8樓，你會先看到？", hintImage: "https://placehold.co/600x400/10b981/white?text=8樓視聽室", qrKey: "團體欣賞室", question: "北市圖的視聽資料借期是幾天？可續借幾次？", options: ["14天，2次", "14天，3次", "30天，2次", "30天，3次"], answer: 1, icon: "🚀" },
-            { floorName: "3F：參考室、美國資料中心、留學資料中心", floorIntro: "探險的終點站！這裡典藏了豐富的美國歷史與文化資訊，目前的 America250 特別展覽正訴說著跨越兩世紀的自由故事。", hintTitle: "找到 America250 特展海報觀察標語 測試答案05。", hintImage: "https://placehold.co/600x400/8b5cf6/white?text=3樓特展海報", qrKey: "05", question: "America250 的核心慶祝精神是什麼？", options: ["睡覺與休息", "多元、自由與未來", "買東西與購物", "考試與寫作業"], answer: 1, icon: "🎆" }
+            { floorName: "1F：入館大廳與服務區", floorIntro: "這裡是探險的第一站，提供辦證、借還書服務，還有各種精彩的主題書展在這裡展出喔！是讀者與書籍相遇的起始點，充滿了探索的可能。", hintTitle: "故事的起點：找找今年寒假閱讀節是介紹哪個國家呢？ 測試答案：泰國", hintImage: "https://lh3.googleusercontent.com/u/0/d/1bu7f3Xe6HXI2mQpKzNXY-h36fuz8C9Rp", qrKey: "泰國", question: "今年寒假閱讀節的主題是？", options: ["「泰」想見你", "「泰」享閱讀", "「泰」會讀書", "「泰」度決定一切"], answer: 1, icon: "🚢" },
+            { floorName: "B1：兒童室、吳大猷書房, B2：小小世界外文圖書館", floorIntro: "這裡是小朋友的秘密基地！有豐富的故事書、繪本以及專為兒童設計的閱讀空間，讓孩子在書海中展開奇幻冒險。", hintTitle: "科學與觀察：前往B1找找這個人是誰？ 測試答案：吳大猷", hintImage: "https://lh3.googleusercontent.com/u/0/d/1PfoscpgLwLSpCzX9ZqGc7FPNxFMdKIqc", qrKey: "吳大猷", question: "兒童室每週二～六的開放時間是？", options: ["09:00-17:00", "09:00-21:00", "09:00-18:00", "08:30-21:00"], answer: 2, icon: "⚡" },
+            { floorName: "9F：多元文化資料中心", floorIntro: "中心裡分成8個區域，分別代表不同國家，展示了來自世界各地的文化縮影，透過不同語文的藏書與展覽，帶領你跨越國界，體驗有趣的跨文化知識。", hintTitle: "自由的宣言：位於9樓櫃檯前方的這區書架是在介紹哪個國家呢？ 測試答案：印度", hintImage: "https://lh3.googleusercontent.com/u/0/d/1rql5_csFJ2wWWNBgHYUcdTJVh2841eam", qrKey: "印度", question: "國旗的一邊是等邊三角形，每個角都有一顆星星，三角形的中央有一個太陽，三角形的右側是藍紅兩色。請問是哪個國家呢？", options: ["韓國", "緬甸", "泰國", "菲律賓"], answer: 3, icon: "📜" },
+            { floorName: "8F：視聽室", floorIntro: "在這裡，故事不只在書本裡，更在螢幕與耳機中。視聽室提供豐富的影音資料借閱，並設有視聽內閱區，3人以上還可登記使用如同包廂式的親子欣賞室。此外，還會定期放映熱門電影和舉辦音樂、電影講座及收看串流影音服務，歡迎大朋友小朋友來免費欣賞。", hintTitle: "邁向未來：前往8樓，你會先看到？ 測試答案：團體欣賞室", hintImage: "https://lh3.googleusercontent.com/u/0/d/1VVdbVMHpGEJj5uLMJdZ0ZRyLXSLihAY5", qrKey: "團體欣賞室", question: "北市圖的視聽資料借期是幾天？可續借幾次？", options: ["14天，2次", "14天，3次", "30天，2次", "30天，3次"], answer: 1, icon: "🚀" },
+            { floorName: "3F：參考室、美國資料中心、留學資料中心", floorIntro: "探險的終點站！這裡典藏了豐富的美國歷史與文化資訊，目前的 America250 特別展覽正訴說著跨越兩世紀的自由故事。", hintTitle: "測試答案：05。", hintImage: "https://placehold.co/800x800/8b5cf6/white?text=3樓特展海報", qrKey: "05", question: "America的核心精神是什麼？", options: ["睡覺與休息", "多元、自由與未來", "買東西與購物", "考試與寫作業"], answer: 1, icon: "🎆" }
         ];
 
         let gameState = { completed: [false, false, false, false, false], currentTask: null };
@@ -243,7 +268,7 @@
             showModal(`
                 <div class="text-center">
                     <h2 class="text-xl font-bold text-blue-800 mb-2">📍 第 ${i+1} 個碎片位置</h2>
-                    <img src="${task.hintImage}" class="hint-img shadow-lg" onerror="this.src='https://placehold.co/600x400?text=照片載入中...'">
+                    <img src="${task.hintImage}" class="hint-img shadow-lg" onerror="this.src='https://placehold.co/800x800?text=照片載入中...'">
                     <p class="font-bold mb-4 text-gray-700">${task.hintTitle}</p>
                     <div class="bg-blue-50 p-6 rounded-2xl border-2 border-blue-200">
                         <input type="text" id="modal-qr-input" placeholder="輸入答案" class="w-full p-4 border-2 rounded-xl text-center mb-2 font-bold uppercase outline-none focus:border-blue-500">
@@ -274,7 +299,7 @@
                     <!-- 1. 標題 -->
                     <div class="flex items-center gap-2 mb-4 border-b-2 border-blue-100 pb-2">
                         <span class="text-3xl">${task.icon}</span>
-                        <h2 class="text-xl font-black text-blue-900">任務 ${i+1}：${task.floorName.split('：')[0]}</h2>
+                        <h2 class="text-xl font-black text-blue-900">${task.floorName}</h2>
                     </div>
                     
                     <!-- 2. 樓層簡介 -->
