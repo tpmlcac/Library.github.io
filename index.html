@@ -11,14 +11,12 @@
         body {
             font-family: 'Noto Sans TC', sans-serif;
             background-color: #f1f5f9;
-            /* 禁止選取文字 */
             -webkit-user-select: none;
             -moz-user-select: none;
             -ms-user-select: none;
             user-select: none;
         }
 
-        /* 闖關卡片樣式 */
         .card {
             transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             perspective: 1000px;
@@ -32,7 +30,6 @@
             border: 4px solid #f59e0b !important;
         }
 
-        /* 模態框樣式 */
         .modal-overlay {
             display: none;
             position: fixed;
@@ -46,7 +43,6 @@
         }
         .modal-overlay.active { display: flex; }
 
-        /* 拉霸容器 */
         .slot-container {
             height: 120px;
             overflow: hidden;
@@ -77,7 +73,6 @@
         @keyframes win-glow { from { transform: scale(1); } to { transform: scale(1.02); } }
         .prize-text { font-size: 2rem !important; color: #facc15 !important; text-shadow: 0 0 15px rgba(250, 204, 21, 0.6); }
 
-        /* 照片 1:1 比例 */
         .hint-img { 
             width: 100%; 
             aspect-ratio: 1 / 1; 
@@ -97,13 +92,12 @@
         <h1 class="text-3xl font-bold mb-2">時空探險家：解鎖 250 年的秘密</h1>
         <div class="max-w-2xl mx-auto text-sm opacity-90 bg-black/20 p-4 rounded-lg">
             探險家你好！我們收到一封求救信，<br>
-            美國建國250週年的「時空之鑰」碎成了五片，散落在圖書館各處。<br>
+            美國建國250週年的「時空之鑰」碎成了5片，散落在圖書館各處。<br>
             需要你運用觀察力和智慧找出碎片，開啟通往慶典的大門！
         </div>
     </header>
 
     <main class="max-w-4xl mx-auto px-4">
-        <!-- 進度條 -->
         <div class="mb-8 bg-white p-4 rounded-xl shadow-sm border border-gray-100">
             <div class="flex justify-between mb-2">
                 <span class="text-sm font-medium text-blue-700">歷史碎片收集進度</span>
@@ -114,7 +108,6 @@
             </div>
         </div>
 
-        <!-- 碎片網格 -->
         <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-10">
             <div id="card-0" onclick="handleCardClick(0)" class="card card-inactive bg-white rounded-2xl p-4 flex flex-col items-center text-center shadow-md border-2 border-transparent">
                 <div class="text-4xl mb-2">🚢</div>
@@ -144,7 +137,6 @@
         </div>
     </main>
 
-    <!-- 一般闖關 Modal -->
     <div id="modal" class="modal-overlay">
         <div id="modal-container" class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl relative overflow-y-auto max-h-[90vh]">
             <button onclick="closeModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 z-10">✕</button>
@@ -152,14 +144,12 @@
         </div>
     </div>
 
-    <!-- 最後核銷與抽獎 Modal -->
     <div id="final-modal" class="modal-overlay">
         <div class="bg-white rounded-[2.5rem] max-w-md w-full shadow-2xl overflow-hidden border-8 border-slate-900">
             <div class="bg-slate-900 p-6 text-center">
                 <h2 class="text-yellow-400 text-xl font-black italic tracking-widest uppercase">AMERICA 250 REWARD</h2>
             </div>
             
-            <!-- 填寫資料 -->
             <div id="final-step-1" class="p-8 text-center">
                 <div class="text-5xl mb-4">🎊</div>
                 <h3 class="text-xl font-bold mb-6">收集成功！請填寫資料</h3>
@@ -179,11 +169,10 @@
                 </button>
             </div>
 
-            <!-- 館員核銷 -->
             <div id="final-step-2" class="hidden p-8 text-center space-y-4">
                 <div class="text-5xl">👮</div>
                 <h3 class="text-2xl font-black text-red-600">探險家身份已確認</h3>
-                <p class="text-slate-500 font-bold">向3F館員詢問解鎖密碼 測試答案：888</p>
+                <p class="text-slate-500 font-bold">向3F館員詢問解鎖密碼 測試密碼：888</p>
                 <div class="bg-slate-900 p-8 rounded-[2rem] space-y-4">
                     <input type="password" id="admin-pass" maxlength="3" placeholder="密碼" class="w-full bg-white border-4 border-blue-400 p-4 rounded-2xl text-center font-black text-4xl outline-none">
                     <button onclick="verifyStaff()" class="w-full bg-yellow-400 text-slate-900 font-black py-4 rounded-2xl text-xl shadow-[0_6px_0_#b45309] active:translate-y-1 active:shadow-none transition-all">
@@ -193,7 +182,6 @@
                 <button onclick="resetToStep1()" class="text-slate-400 font-bold text-sm underline">回上一步</button>
             </div>
 
-            <!-- 單一抽獎框 -->
             <div id="final-step-3" class="hidden p-8 text-center space-y-6">
                 <h2 id="draw-title" class="text-2xl font-black text-slate-800">🗽幸運大轉盤</h2>
 
@@ -206,9 +194,9 @@
                 </button>
                 
                 <div id="final-result-area" class="hidden space-y-4">
-                    <div class="text-green-600 font-black text-lg animate-bounce">🎊 請出示畫面領取獎項 🎊</div>
+                    <div class="text-green-600 font-black text-lg animate-bounce">🎊 請至3F櫃台出示此畫面領取獎項 🎊</div>
                     <button id="claim-btn" onclick="confirmClaim()" class="w-full bg-green-600 text-white font-bold py-4 rounded-2xl shadow-lg active:scale-95 transition-transform">
-                        館員確認已兌換
+                        核銷專用按鈕
                     </button>
                 </div>
 
@@ -224,9 +212,7 @@
     </div>
 
     <script>
-        // 禁止右鍵與特定快速鍵
         document.addEventListener('keydown', function(e) {
-            // 阻擋 F12, Ctrl+Shift+I, Ctrl+U, Ctrl+C
             if (e.keyCode == 123 || 
                 (e.ctrlKey && e.shiftKey && (e.keyCode == 73 || e.keyCode == 74)) || 
                 (e.ctrlKey && (e.keyCode == 85 || e.keyCode == 67 || e.keyCode == 83))) {
@@ -243,16 +229,15 @@
             { name: "🥤 杯套", weight: 45 },
             { name: "✨ 充電器", weight: 10 }
         ];
-        const DECOR_ICONS = ["🦅", "🗽", "⚾", "🍎", "🪐", "🎸", "🤠","🍔"];
+        const DECOR_ICONS = ["🦅", "🗽", "⚾", "🍎", "🪐", "🎸", "🍔"];
         const REEL_COUNT = 50;
 
-        // 題目資料庫
         const questData = [
-            { floorName: "1F：入館大廳與服務區", floorIntro: "這裡是探險的第一站，提供辦證、借還書服務，還有各種精彩的主題書展在這裡展出喔！是讀者與書籍相遇的起始點，充滿了探索的可能。", hintTitle: "故事的起點：找找今年寒假閱讀節是介紹哪個國家呢？ 測試答案：泰國", hintImage: "https://lh3.googleusercontent.com/u/0/d/1bu7f3Xe6HXI2mQpKzNXY-h36fuz8C9Rp", qrKey: "泰國", question: "今年寒假閱讀節的主題是？", options: ["「泰」想見你", "「泰」享閱讀", "「泰」會讀書", "「泰」度決定一切"], answer: 1, icon: "🚢" },
-            { floorName: "B1：兒童室、吳大猷書房, B2：小小世界外文圖書館", floorIntro: "這裡是小朋友的秘密基地！有豐富的故事書、繪本以及專為兒童設計的閱讀空間，讓孩子在書海中展開奇幻冒險。", hintTitle: "科學與觀察：前往B1找找這個人是誰？ 測試答案：吳大猷", hintImage: "https://lh3.googleusercontent.com/u/0/d/1PfoscpgLwLSpCzX9ZqGc7FPNxFMdKIqc", qrKey: "吳大猷", question: "兒童室每週二～六的開放時間是？", options: ["09:00-17:00", "09:00-21:00", "09:00-18:00", "08:30-21:00"], answer: 2, icon: "⚡" },
-            { floorName: "9F：多元文化資料中心", floorIntro: "中心裡分成8個區域，分別代表不同國家，展示了來自世界各地的文化縮影，透過不同語文的藏書與展覽，帶領你跨越國界，體驗有趣的跨文化知識。", hintTitle: "自由的宣言：位於9樓櫃檯前方的這區書架是在介紹哪個國家呢？ 測試答案：印度", hintImage: "https://lh3.googleusercontent.com/u/0/d/1rql5_csFJ2wWWNBgHYUcdTJVh2841eam", qrKey: "印度", question: "國旗的一邊是等邊三角形，每個角都有一顆星星，三角形的中央有一個太陽，三角形的右側是藍紅兩色。請問是哪個國家呢？", options: ["韓國", "緬甸", "泰國", "菲律賓"], answer: 3, icon: "📜" },
-            { floorName: "8F：視聽室", floorIntro: "在這裡，故事不只在書本裡，更在螢幕與耳機中。視聽室提供豐富的影音資料借閱，並設有視聽內閱區，3人以上還可登記使用如同包廂式的親子欣賞室。此外，還會定期放映熱門電影和舉辦音樂、電影講座及收看串流影音服務，歡迎大朋友小朋友來免費欣賞。", hintTitle: "邁向未來：前往8樓，你會先看到？ 測試答案：團體欣賞室", hintImage: "https://lh3.googleusercontent.com/u/0/d/1VVdbVMHpGEJj5uLMJdZ0ZRyLXSLihAY5", qrKey: "團體欣賞室", question: "北市圖的視聽資料借期是幾天？可續借幾次？", options: ["14天，2次", "14天，3次", "30天，2次", "30天，3次"], answer: 1, icon: "🚀" },
-            { floorName: "3F：參考室、美國資料中心、留學資料中心", floorIntro: "探險的終點站！這裡典藏了豐富的美國歷史與文化資訊，目前的 America250 特別展覽正訴說著跨越兩世紀的自由故事。", hintTitle: "測試答案：05。", hintImage: "https://placehold.co/800x800/8b5cf6/white?text=3樓特展海報", qrKey: "05", question: "America的核心精神是什麼？", options: ["睡覺與休息", "多元、自由與未來", "買東西與購物", "考試與寫作業"], answer: 1, icon: "🎆" }
+            { floorName: "1F：入館大廳與服務區", floorIntro: "這裡是探險的第一站，提供辦證、借還書服務，還有各種精彩的主題書展在這裡展出喔！是讀者與書籍相遇的起始點，充滿了探索的可能。", hintTitle: "故事的起點：找找今年寒假閱讀節是介紹哪個國家呢？測試答案：泰國", hintImage: "https://lh3.googleusercontent.com/u/0/d/1bu7f3Xe6HXI2mQpKzNXY-h36fuz8C9Rp", qrKey: "泰國", question: "今年寒假閱讀節的主題是？", options: ["「泰」想見你", "「泰」享閱讀", "「泰」會讀書", "「泰」度決定一切"], answer: 1, icon: "🚢" },
+            { floorName: "B1：兒童室、吳大猷書房, B2：小小世界外文圖書館", floorIntro: "這裡是小朋友的秘密基地！有豐富的故事書、繪本以及專為兒童設計的閱讀空間，讓孩子在書海中展開奇幻冒險。", hintTitle: "科學與觀察：前往B1找找這個人是誰？測試答案：吳大猷", hintImage: "https://lh3.googleusercontent.com/u/0/d/1PfoscpgLwLSpCzX9ZqGc7FPNxFMdKIqc", qrKey: "吳大猷", question: "兒童室每週二～六的開放時間是？", options: ["09:00-17:00", "09:00-21:00", "09:00-18:00", "08:30-21:00"], answer: 2, icon: "⚡" },
+            { floorName: "9F：多元文化資料中心", floorIntro: "中心裡分成8個區域，分別代表不同國家，展示了來自世界各地的文化縮影，透過不同語文的藏書與展覽，帶領你跨越國界，體驗有趣的跨文化知識。", hintTitle: "自由的宣言：位於9樓櫃檯前方的這區書架是在介紹哪個國家呢？ 測試答案：印度", hintImage: "https://lh3.googleusercontent.com/u/0/d/1rql5_csFJ2wWWNBgHYUcdTJVh2841eam", qrKey: "泰國", question: "國旗的一邊是等邊三角形，每個角都有一顆星星，三角形的中央有一個太陽，三角形的右側是藍紅兩色。請問是哪個國家呢？", options: ["韓國", "緬甸", "泰國", "菲律賓"], answer: 3, icon: "📜" },
+            { floorName: "8F：視聽室", floorIntro: "在這裡，故事不只在書本裡，更在螢幕與耳機中。視聽室提供豐富的影音資料借閱，並設有視聽內閱區，3人以上還可登記使用如同包廂式的親子欣賞室。此外，還會定期放映熱門電影和舉辦音樂、電影講座及收看串流影音服務，歡迎大朋友小朋友來免費欣賞。", hintTitle: "邁向未來：前往8樓，你會先看到？測試答案：團體欣賞室", hintImage: "https://lh3.googleusercontent.com/u/0/d/1VVdbVMHpGEJj5uLMJdZ0ZRyLXSLihAY5", qrKey: "團體欣賞室", question: "北市圖的視聽資料借期是幾天？可續借幾次？", options: ["14天，2次", "14天，3次", "30天，2次", "30天，3次"], answer: 1, icon: "🚀" },
+            { floorName: "3F：參考室、美國資料中心、留學資料中心", floorIntro: "探險的終點站！這裡典藏了豐富的美國歷史與文化資訊，目前的 America250 特別展覽正訴說著跨越兩世紀的自由故事。", hintTitle: "找到 America250 特展海報觀察標語 測試答案05。", hintImage: "https://placehold.co/800x800/8b5cf6/white?text=3樓特展海報", qrKey: "05", question: "America250 的核心慶祝精神是什麼？", options: ["睡覺與休息", "多元、自由與未來", "買東西與購物", "考試與寫作業"], answer: 1, icon: "🎆" }
         ];
 
         let gameState = { completed: [false, false, false, false, false], currentTask: null };
@@ -308,30 +293,18 @@
 
             showModal(`
                 <div>
-                    <!-- 1. 標題 -->
                     <div class="flex items-center gap-2 mb-4 border-b-2 border-blue-100 pb-2">
                         <span class="text-3xl">${task.icon}</span>
                         <h2 class="text-xl font-black text-blue-900">${task.floorName}</h2>
                     </div>
-                    
-                    <!-- 2. 樓層簡介 -->
                     <div class="bg-blue-50 p-4 rounded-xl mb-6 border-l-4 border-blue-400">
-                        <p class="text-sm text-blue-800 leading-relaxed font-bold">
-                            <span class="bg-blue-200 px-2 py-0.5 rounded text-xs mr-1">樓層探索</span>
-                            ${task.floorIntro}
-                        </p>
+                        <p class="text-sm text-blue-800 leading-relaxed font-bold">${task.floorIntro}</p>
                     </div>
-
-                    <!-- 3. 題目內容 -->
                     <p class="text-lg font-black mb-6 text-gray-800 leading-tight">
                         <span class="text-red-500 mr-1">Q:</span>${task.question}
                     </p>
-
-                    <!-- 4. 選項 -->
                     <div id="quiz-error" class="hidden text-red-600 mb-4 text-center font-bold animate-pulse">❌ 答案不正確，請再試一次！</div>
-                    <div class="space-y-1">
-                        ${opts}
-                    </div>
+                    <div class="space-y-1">${opts}</div>
                 </div>
             `);
         }
@@ -415,7 +388,7 @@
 
             setTimeout(() => {
                 mainSlot.classList.add('is-winner');
-                document.getElementById('final-message').classList.remove('hidden');
+                document.getElementById('final-result-area').classList.remove('hidden');
                 document.getElementById('draw-title').innerText = "✨ 恭喜獲獎 ✨";
                 btn.style.display = 'none';
             }, 3600);
@@ -441,13 +414,21 @@
                     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                     body: formData
                 });
-                
                 statusLabel.innerText = "✅ 數據已傳輸至總部";
                 statusLabel.classList.add('text-green-600');
             } catch (error) {
                 statusLabel.innerText = "⚠️ 網路傳輸異常，請館員檢查";
                 statusLabel.classList.add('text-red-500');
             }
+        }
+
+        function confirmClaim() {
+            document.getElementById('final-result-area').classList.add('hidden');
+            document.getElementById('redeemed-area').classList.remove('hidden');
+            document.getElementById('draw-title').innerText = "冒險結束";
+            document.getElementById('main-slot').style.filter = "grayscale(1)";
+            document.getElementById('submit-status').innerText = "✅ 已核銷完畢";
+            document.getElementById('submit-status').className = "text-xs font-bold text-green-600";
         }
 
         function showModal(content) { document.getElementById('modal-content').innerHTML = content; document.getElementById('modal').classList.add('active'); }
